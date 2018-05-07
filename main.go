@@ -2,12 +2,15 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	homedir "github.com/mitchellh/go-homedir"
 	emoji "gopkg.in/kyokomi/emoji.v1"
+	"gopkg.in/urfave/cli.v1"
 )
 
 const (
@@ -51,7 +54,25 @@ func tryExpandPath(path string) string {
 	return path
 }
 
+func init() {
+	cli.VersionPrinter = func(c *cli.Context) {
+		fmt.Fprintf(c.App.Writer, "%s\n", c.App.Version)
+	}
+}
+
 func main() {
+	dreich := cli.NewApp()
+	dreich.Name = "dreich"
+	dreich.Version = "0.0.1"
+	dreich.Description = "A weather CLI tool"
+
+	dreich.Flags = []cli.Flag{
+		cli.BoolFlag{
+			Name:  "emoji, e",
+			Usage: "show weather as emoji",
+		},
+	}
+
 	raw, err := ioutil.ReadFile(tryExpandPath(defaultConfigFileLocation))
 	if err != nil {
 		log.Fatal("Reading config:", err)
@@ -61,6 +82,19 @@ func main() {
 	json.Unmarshal(raw, &cfg)
 
 	weatherClient := NewClient(http.Client{}, cfg.AppID)
-	weather := weatherClient.Weather("London,uk")
-	emoji.Println(weather.Description + " " + emojiMap[weather.Icon])
+
+	dreich.Action = func(c *cli.Context) error {
+		weather := weatherClient.Weather("London,uk")
+		if c.Bool("emoji") {
+			emoji.Println(emojiMap[weather.Icon])
+		} else {
+			log.Println(weather.Description)
+		}
+		return nil
+	}
+
+	err = dreich.Run(os.Args)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
