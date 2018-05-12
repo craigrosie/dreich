@@ -19,7 +19,8 @@ const (
 
 // Config holds config values for the app
 type Config struct {
-	AppID string `json:"app_id"`
+	AppID           string `json:"app_id"`
+	DefaultLocation string `json:"default_location,omitempty"`
 }
 
 var emojiMap = map[string]string{
@@ -64,7 +65,7 @@ func main() {
 	dreich := cli.NewApp()
 	dreich.Name = "dreich"
 	dreich.Version = "0.0.1"
-	dreich.Description = "A weather CLI tool"
+	dreich.Usage = "A weather CLI tool"
 
 	dreich.Flags = []cli.Flag{
 		cli.BoolFlag{
