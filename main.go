@@ -68,9 +68,18 @@ func main() {
 	dreich.Usage = "A weather CLI tool"
 
 	dreich.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:   "appid, a",
+			Usage:  "OpenWeatherMap `APPID`",
+			EnvVar: "OPEN_WEATHER_MAP_APPID",
+		},
 		cli.BoolFlag{
 			Name:  "emoji, e",
 			Usage: "show weather as emoji",
+		},
+		cli.StringFlag{
+			Name:  "location, l",
+			Usage: "define `location` to get weather for",
 		},
 	}
 
@@ -82,10 +91,29 @@ func main() {
 	var cfg Config
 	json.Unmarshal(raw, &cfg)
 
-	weatherClient := NewClient(http.Client{}, cfg.AppID)
-
 	dreich.Action = func(c *cli.Context) error {
-		weather := weatherClient.Weather("London,uk")
+		location := "London,uk"
+		appID := ""
+
+		if cfg.AppID != "" {
+			appID = cfg.AppID
+		}
+
+		if c.String("appid") != "" {
+			appID = c.String("appid")
+		}
+
+		weatherClient := NewClient(http.Client{}, appID)
+
+		if cfg.DefaultLocation != "" {
+			location = cfg.DefaultLocation
+		}
+
+		if c.String("location") != "" {
+			location = c.String("location")
+		}
+
+		weather := weatherClient.Weather(location)
 		if c.Bool("emoji") {
 			emoji.Println(emojiMap[weather.Icon])
 		} else {
