@@ -96,41 +96,40 @@ type Data struct {
 	TempMax  float64 `json:"temp_max"`
 }
 
-// WindData models the OpenWeatherMap weather endpoint wind data
+// WindData models the OpenWeatherMap wind data
 type WindData struct {
 	Speed float64 `json:"speed"`
 	Deg   int     `json:"deg"`
 }
 
-// CloudData models the OpenWeatherMap weather endpoint cloud data
+// CloudData models the OpenWeatherMap cloud data
 type CloudData struct {
 	Cloudiness int `json:"all"`
 }
 
-// SysData models the OpenWeatherMap weather endpoint sys data
-type SysData struct {
-	Type    int     `json:"type"`
-	ID      int     `json:"id"`
-	Message float64 `json:"message"`
-	Country string  `json:"country"`
-	Sunrise int     `json:"sunrise"`
-	Sunset  int     `json:"sunset"`
+// RainData models the OpenWeatherMap rain data
+type RainData struct {
+	Volume int `json:"3h"`
+}
+
+// SnowData models the OpenWeatherMap snow data
+type SnowData struct {
+	Volume int `json:"3h"`
 }
 
 // WeatherResponse models the OpenWeatherMap weather endpoint full weather response data
 type WeatherResponse struct {
 	Coords      CoordData     `json:"coord"`
 	WeatherList []WeatherData `json:"weather"`
-	Base        string        `json:"base"`
 	Data        Data          `json:"main"`
 	Visibility  int           `json:"visibility"`
-	Wind        WindData      `json:"wind"`
-	Clouds      CloudData     `json:"clouds"`
+	Wind        WindData      `json:"wind,omitempty"`
+	Clouds      CloudData     `json:"clouds,omitempty"`
+	Rain        RainData      `json:"rain,omitempty"`
+	Snow        SnowData      `json:"snow,omitempty"`
 	TimeStamp   int           `json:"dt"`
-	Sys         SysData       `json:"sys"`
 	ID          string        `json:"id"`
 	LocName     string        `json:"name"`
-	Cod         int           `json:"cod"`
 }
 
 // NewClient returns an API client instance
