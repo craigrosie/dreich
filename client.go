@@ -127,7 +127,7 @@ type WeatherResponse struct {
 	Clouds      CloudData     `json:"clouds,omitempty"`
 	Rain        RainData      `json:"rain,omitempty"`
 	Snow        SnowData      `json:"snow,omitempty"`
-	TimeStamp   int           `json:"dt"`
+	Timestamp   int64         `json:"dt"`
 	ID          string        `json:"id"`
 	LocName     string        `json:"name"`
 }
