@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
 const (
@@ -71,6 +72,7 @@ type apiClient struct {
 type weatherDict struct {
 	Description string
 	Icon        string
+	Timestamp   time.Time
 }
 
 // CoordData models OpenWeatherMap weather endpoint coord data
@@ -164,5 +166,6 @@ func (client *apiClient) Weather(location string) *weatherDict {
 	return &weatherDict{
 		jsonResp.WeatherList[0].Main,
 		jsonResp.WeatherList[0].Icon,
+		time.Unix(jsonResp.Timestamp, 0).UTC().In(time.Local),
 	}
 }
