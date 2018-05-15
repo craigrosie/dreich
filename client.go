@@ -62,6 +62,7 @@ const (
 // APIClient defines an interface for an OpenWeatherMap API client
 type APIClient interface {
 	Weather(string) *weatherDict
+	Tomorrow(string) *[]weatherDict
 }
 
 type apiClient struct {
@@ -259,4 +260,23 @@ func (client *apiClient) Forecast(location string) *[]weatherDict {
 	}
 
 	return &weatherDicts
+}
+
+func (client *apiClient) Tomorrow(location string) *[]weatherDict {
+	forecastData := client.Forecast(location)
+
+	tom := time.Now().AddDate(0, 0, 1)
+	dayAfter := tom.AddDate(0, 0, 1)
+
+	start := time.Date(tom.Year(), tom.Month(), tom.Day(), 0, 0, 0, 0, tom.Location())
+	end := time.Date(dayAfter.Year(), dayAfter.Month(), dayAfter.Day(), 0, 0, 0, 0, dayAfter.Location())
+
+	tomorrowData := []weatherDict{}
+	for _, w := range *forecastData {
+		if w.Timestamp.After(start) && w.Timestamp.Before(end) {
+			tomorrowData = append(tomorrowData, w)
+		}
+	}
+
+	return &tomorrowData
 }
