@@ -134,6 +134,78 @@ type WeatherResponse struct {
 	LocName     string        `json:"name"`
 }
 
+// Example forecast response
+// {
+// 	"city":{
+// 		"id":1851632,
+// 		"name":"Shuzenji",
+// 		"coord":{
+// 			"lon":138.933334,
+// 			"lat":34.966671
+// 		},
+// 		"country":"JP",
+// 		"cod":"200",
+// 		"message":0.0045,
+// 		"cnt":38,
+// 		"list":[{
+// 			"dt":1406106000,
+// 			"main":{
+// 				"temp":298.77,
+// 				"temp_min":298.77,
+// 				"temp_max":298.774,
+// 				"pressure":1005.93,
+// 				"sea_level":1018.18,
+// 				"grnd_level":1005.93,
+// 				"humidity":87,
+// 				"temp_kf":0.26
+// 			},
+// 			"weather":[{
+// 				"id":804,
+// 				"main":"Clouds",
+// 				"description":"overcast clouds",
+// 				"icon":"04d"
+// 			}],
+// 			"clouds":{
+// 				"all":88
+// 			},
+// 			"wind":{
+// 				"speed":5.71,
+// 				"deg":229.501
+// 			},
+// 			"sys":{
+// 				"pod":"d"
+// 			},
+// 			"dt_txt":"2014-07-23 09:00:00"
+// 		}]
+// 	}
+// }
+
+// ForecastElement models the OpenWeatherMap forecast endpoint forecast data
+type ForecastElement struct {
+	Timestamp     int64         `json:"dt"`
+	Data          Data          `json:"main"`
+	WeatherList   []WeatherData `json:"weather"`
+	Wind          WindData      `json:"wind,omitempty"`
+	Clouds        CloudData     `json:"clouds,omitempty"`
+	Rain          RainData      `json:"rain,omitempty"`
+	Snow          SnowData      `json:"snow,omitempty"`
+	TimestampText string        `json:"dt_txt"`
+}
+
+// CityData models the OpenWeatherMap forecast endpoint city data
+type CityData struct {
+	ID      int       `json:"id"`
+	Name    string    `json:"name"`
+	Coords  CoordData `json:"coord"`
+	Country string    `json:"country"`
+}
+
+// ForecastResponse models the OpenWeatherMap forecast endpoint response data
+type ForecastResponse struct {
+	City      CityData          `json:"city"`
+	Forecasts []ForecastElement `json:"list"`
+}
+
 // NewClient returns an API client instance
 func NewClient(httpClient http.Client, appID string) APIClient {
 	return &apiClient{&httpClient, appID}
@@ -168,4 +240,23 @@ func (client *apiClient) Weather(location string) *weatherDict {
 		jsonResp.WeatherList[0].Icon,
 		time.Unix(jsonResp.Timestamp, 0).UTC().In(time.Local),
 	}
+}
+
+func (client *apiClient) Forecast(location string) *[]weatherDict {
+	url := baseURL + "forecast?q=" + location
+	response := client.apiCall(url)
+
+	var jsonResp ForecastResponse
+	json.Unmarshal(response, &jsonResp)
+
+	weatherDicts := []weatherDict{}
+	for _, w := range jsonResp.Forecasts {
+		weatherDicts = append(weatherDicts, weatherDict{
+			w.WeatherList[0].Main,
+			w.WeatherList[0].Icon,
+			time.Unix(w.Timestamp, 0).UTC().In(time.Local),
+		})
+	}
+
+	return &weatherDicts
 }
