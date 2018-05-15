@@ -81,6 +81,10 @@ func main() {
 			Name:  "location, l",
 			Usage: "define `location` to get weather for",
 		},
+		cli.BoolFlag{
+			Name:  "tomorrow, t",
+			Usage: "get the forecast for tomorrow",
+		},
 	}
 
 	raw, err := ioutil.ReadFile(tryExpandPath(defaultConfigFileLocation))
@@ -113,11 +117,23 @@ func main() {
 			location = c.String("location")
 		}
 
-		weather := weatherClient.Weather(location)
-		if c.Bool("emoji") {
-			emoji.Println(emojiMap[weather.Icon])
+		if c.Bool("tomorrow") {
+			forecast := weatherClient.Tomorrow(location)
+
+			for _, f := range *forecast {
+				if c.Bool("emoji") {
+					emoji.Println(f.Timestamp.Format("15:04") + "\t" + emojiMap[f.Icon])
+				} else {
+					fmt.Println(f.Timestamp.Format("15:04") + "\t" + f.Description)
+				}
+			}
 		} else {
-			log.Println(weather.Description)
+			weather := weatherClient.Weather(location)
+			if c.Bool("emoji") {
+				emoji.Println(emojiMap[weather.Icon])
+			} else {
+				log.Println(weather.Description)
+			}
 		}
 		return nil
 	}
