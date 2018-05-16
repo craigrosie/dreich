@@ -216,6 +216,7 @@ func (client *apiClient) apiCall(url string) []byte {
 	appIDURL := url + "&APPID=" + client.appID
 
 	resp, err := client.httpClient.Get(appIDURL)
+	defer resp.Body.Close()
 
 	if err != nil {
 		log.Fatal(err)
