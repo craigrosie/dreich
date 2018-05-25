@@ -1,10 +1,13 @@
 package main
 
 import (
+	"crypto/sha1"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -213,20 +216,40 @@ func NewClient(httpClient http.Client, appID string) APIClient {
 }
 
 func (client *apiClient) apiCall(url string) []byte {
+	urlHash := sha1.New()
+	urlHash.Write([]byte(url))
+
+	cachePath := tryExpandPath(fmt.Sprintf("~/.dreich/cache/%x.json", urlHash.Sum(nil)))
+	if stat, err := os.Stat(cachePath); !os.IsNotExist(err) {
+		now := time.Now()
+		diff := now.Sub(stat.ModTime())
+		if diff.Seconds() < 300 {
+			raw, err := ioutil.ReadFile(cachePath)
+			if err != nil {
+				log.Println("Could not read cache file:", err)
+			} else {
+				log.Println("Reading from cache!")
+				return raw
+			}
+		}
+	}
+
 	appIDURL := url + "&APPID=" + client.appID
 
 	resp, err := client.httpClient.Get(appIDURL)
-	defer resp.Body.Close()
-
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
+	if err := ioutil.WriteFile(cachePath, body, 0644); err != nil {
+		log.Println("Could not write cache file:", err)
+	}
 	return body
 }
 

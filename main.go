@@ -62,6 +62,12 @@ func init() {
 }
 
 func main() {
+
+	err := os.MkdirAll(tryExpandPath("~/.dreich/cache/"), os.ModeDir)
+	if err != nil {
+		log.Println("Could not create cache directory:", err)
+	}
+
 	dreich := cli.NewApp()
 	dreich.Name = "dreich"
 	dreich.Version = "0.0.1"
