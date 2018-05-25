@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	defaultConfigFileLocation = "~/.dreich.conf.json"
+	defaultConfigFileLocation = "~/.dreich/conf.json"
 )
 
 // Config holds config values for the app

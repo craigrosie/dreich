@@ -12,7 +12,7 @@ go get github.com/craigrosie/dreich
 
 ## Configuration
 
-`dreich` looks for a configuration file at `~/.dreich.conf.json`, and expects the following format:
+`dreich` looks for a configuration file at `~/.dreich/conf.json`, and expects the following format:
 
 ```json
 {
