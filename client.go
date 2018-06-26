@@ -228,7 +228,6 @@ func (client *apiClient) apiCall(url string) []byte {
 			if err != nil {
 				log.Println("Could not read cache file:", err)
 			} else {
-				log.Println("Reading from cache!")
 				return raw
 			}
 		}
@@ -241,6 +240,9 @@ func (client *apiClient) apiCall(url string) []byte {
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		log.Fatal("Error from OpenWeatherMap API - check the location you're passing")
+	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
