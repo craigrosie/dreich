@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/craigrosie/dreich)](https://goreportcard.com/report/github.com/craigrosie/dreich)
+
 # Dreich
 
 A command-line weather app, written in Go.
